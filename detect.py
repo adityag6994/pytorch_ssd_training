@@ -6,7 +6,7 @@ from torchvision.utils import save_image
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load model checkpoint
-checkpoint = 'checkpoint_ssd300.pth_epoch129.tar'
+checkpoint = 'checkpoint_ssd300.pth.tar'
 checkpoint = torch.load(checkpoint)
 start_epoch = checkpoint['epoch'] + 1
 print('\nLoaded checkpoint from epoch %d.\n' % start_epoch)
@@ -102,7 +102,7 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
 
 
 if __name__ == '__main__':
-    img_path = '/home/agupta/Desktop/naukri2021/pytorch_detection_tensorrt/pytorch_detection_tensorrt/a-PyTorch-Tutorial-to-Object-Detection/data/dummy/images/2021-04-14-212046.jpg'
+    img_path = 'data/rafeeq/test/images/PPE_10.jpg'
     # img_path = '/home/agupta/Desktop/naukri2021/pytorch_detection_tensorrt/pytorch_detection_tensorrt/a-PyTorch-Tutorial-to-Object-Detection/data/experiments/img_100.png'
     original_image = Image.open(img_path, mode='r')
     original_image = original_image.convert('RGB')

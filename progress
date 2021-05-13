@@ -14,9 +14,14 @@ Then, run on custom dataset [x]
 May 13 :
 Run on custom dataset
     09:57 am : started with Rafeeq dataset, for detection on SSD
-    12:12 am : created initial json files, starting with initial training
-        - evaluate on pre-trained weights
-        - play with normalisation
+    12:12 pm : created initial json files, starting with initial training
+    12:30 pm : completed initial training, with no-pt weights
+        - issue with label file, re-training initial model [15:06]
+        - add multi gpu support
+        - evaluate on pre-trained weights [classes are different issue]
+        - play with normalisation [rafeeq dataset specific]
+
+
 Convert it into TensorRT
 
 May 14 :
