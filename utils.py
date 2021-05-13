@@ -8,9 +8,14 @@ import torchvision.transforms.functional as FT
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Label map
-voc_labels = ('aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable',
-              'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor')
-label_map = {k: v + 1 for v, k in enumerate(voc_labels)}
+# voc_labels = ('aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable',
+#               'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor')
+# label_map = {k: v + 1 for v, k in enumerate(voc_labels)}
+# label_map['background'] = 0
+# rev_label_map = {v: k for k, v in label_map.items()}  # Inverse mapping
+
+rafeeq_labels = ('hard_hat', 'safety_glasses', 'safety_vest')
+label_map = {k: v + 1 for v, k in enumerate(rafeeq_labels)}
 label_map['background'] = 0
 rev_label_map = {v: k for k, v in label_map.items()}  # Inverse mapping
 
@@ -45,6 +50,29 @@ def parse_annotation(annotation_path):
         boxes.append([xmin, ymin, xmax, ymax])
         labels.append(label_map[label])
         difficulties.append(difficult)
+
+    return {'boxes': boxes, 'labels': labels, 'difficulties': difficulties}
+
+def parse_annotation_rafeeq(path, annotation_path):
+    boxes = list()
+    labels = list()
+    # difficulties = list()
+
+    label_path =  annotation_path.split('/')[0]+'/labels/'+annotation_path.split('/')[2].split('.')[0]+'.txt'
+    count = 0
+    for i in open(path+'/'+label_path).readlines():
+        count += 1
+        label = i[:-1].split(' ')[0]
+        labels.append(label_map[label])
+        xmin = int(float(i[:-1].split(' ')[4]))
+        ymin = int(float(i[:-1].split(' ')[5]))
+        xmax = int(float(i[:-1].split(' ')[6]))
+        ymax = int(float(i[:-1].split(' ')[7]))
+        boxes.append([xmin, ymin, xmax, ymax])
+
+    difficulties = [None] * count
+    for i in range(count):
+        difficulties[i] = 0
 
     return {'boxes': boxes, 'labels': labels, 'difficulties': difficulties}
 
@@ -122,6 +150,82 @@ def create_data_lists(voc07_path, voc12_path, output_folder):
     print('\nThere are %d test images containing a total of %d objects. Files have been saved to %s.' % (
         len(test_images), n_objects, os.path.abspath(output_folder)))
 
+
+def create_data_lists_rafeeq(rafeeq_path, output_folder):
+    print('Creating --> Rafeeq Dataset')
+    """
+    Create lists of images, the bounding boxes and labels of the objects in these images, and save these to file.
+
+    :param voc07_path: path to the 'VOC2007' folder
+    :param voc12_path: path to the 'VOC2012' folder
+    :param output_folder: folder where the JSONs must be saved
+    """
+    rafeeq_path = os.path.abspath(rafeeq_path)
+
+    train_images = list()
+    train_objects = list()
+    n_objects = 0
+
+    # Training data
+    for path in [rafeeq_path]:
+
+        # Find IDs of images in training data
+        with open(os.path.join(path, 'train.list')) as f:
+            ids = f.read().splitlines()
+
+        for id in ids:
+            # Parse annotation's XML file
+            objects = parse_annotation_rafeeq(path,id)
+            # print(objects)
+            if len(objects['boxes']) == 0:
+                continue
+            n_objects += len(objects)
+            train_objects.append(objects)
+            train_images.append(os.path.join(path, id))
+
+    assert len(train_objects) == len(train_images)
+
+    # Save to file
+    with open(os.path.join(output_folder, 'TRAIN_images.json'), 'w') as j:
+        json.dump(train_images, j)
+    with open(os.path.join(output_folder, 'TRAIN_objects.json'), 'w') as j:
+        json.dump(train_objects, j)
+    with open(os.path.join(output_folder, 'label_map.json'), 'w') as j:
+        json.dump(label_map, j)  # save label map too
+
+    print('\nThere are %d training images containing a total of %d objects. Files have been saved to %s.' % (
+        len(train_images), n_objects, os.path.abspath(output_folder)))
+
+    # Test data
+    test_images = list()
+    test_objects = list()
+    n_objects = 0
+
+    # Find IDs of images in the test data
+    with open(os.path.join(path, 'test.list')) as f:
+        ids = f.read().splitlines()
+
+    for id in ids:
+        # Parse annotation's XML file
+        objects = parse_annotation_rafeeq(path,id)
+        if len(objects) == 0:
+            continue
+        test_objects.append(objects)
+        n_objects += len(objects)
+        test_images.append(os.path.join(path, id))
+
+    assert len(test_objects) == len(test_images)
+
+    # Save to file
+    with open(os.path.join(output_folder, 'TEST_images.json'), 'w') as j:
+        json.dump(test_images, j)
+    with open(os.path.join(output_folder, 'TEST_objects.json'), 'w') as j:
+        json.dump(test_objects, j)
+
+    print('\nThere are %d test images containing a total of %d objects. Files have been saved to %s.' % (
+        len(test_images), n_objects, os.path.abspath(output_folder)))
+
+    print('Created --> Rafeeq Dataset')
 
 def decimate(tensor, m):
     """
@@ -567,7 +671,7 @@ def photometric_distort(image):
 
     for d in distortions:
         if random.random() < 0.5:
-            if d.__name__ is 'adjust_hue':
+            if d.__name__ == 'adjust_hue':
                 # Caffe repo uses a 'hue_delta' of 18 - we divide by 255 because PyTorch needs a normalized value
                 adjust_factor = random.uniform(-18 / 255., 18 / 255.)
             else:

@@ -35,7 +35,11 @@ class PascalVOCDataset(Dataset):
     def __getitem__(self, i):
         # Read image
         image = Image.open(self.images[i], mode='r')
-        image = image.convert('RGB')
+        try:
+            image = image.convert('RGB')
+        except:
+            print('-->', self.images[i])
+            image = Image.new('RGB', (image.size[0], image.size[1]))
 
         # Read objects in this image (bounding boxes, labels, difficulties)
         objects = self.objects[i]

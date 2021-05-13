@@ -1,0 +1,27 @@
+May 11 :
+Add custom dataset to the pipeline  [x]
+
+May 12 :
+Run on COCO first [True]
+Then, run on custom dataset [x]
+    - mean, normalisation really important, predictions changed drastically when using mean/std values from
+     ImageNet (worked best), Dummy Dataset (one false negative), w/o normalised (one false positive)
+    - both mean subtraction and dividing by std is required, just doing mean subtraction doesn't give
+     good result
+
+     07:54 pm : understood convolutions, normalisation thing, ran inference on custom input
+
+May 13 :
+Run on custom dataset
+    09:57 am : started with Rafeeq dataset, for detection on SSD
+    12:12 am : created initial json files, starting with initial training
+        - evaluate on pre-trained weights
+        - play with normalisation
+Convert it into TensorRT
+
+May 14 :
+Quantize model (which will require re-training)
+
+May 15 :
+Try it on Raspberry-Pi
+
