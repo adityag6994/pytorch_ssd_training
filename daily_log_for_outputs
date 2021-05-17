@@ -1,0 +1,36 @@
+For reference : ImageNet
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
+
+mean/variance on rafeeq dataset:
+using calculateImageStats.py
+[[ 0.40207333  0.48251091  0.48539408]
+ [ 9.1537829  10.17201053 10.37777283]]
+
+zzzf_mean_and_std
+----------------------
+without making changes in transform [x] :
+mean = tensor([ 0.0179,  0.1182, -0.0314]) [x]
+std  = tensor([1.0543, 1.1081, 0.9537])    [x]
+
+with resize [300x300]
+mean = tensor([0.4898, 0.4867, 0.4050])
+std  = tensor([0.2774, 0.2832, 0.2501])
+
+with-out resize [300x300]
+mean = tensor([0.4898, 0.4867, 0.4049])
+std  = tensor([0.2813, 0.2871, 0.2538])
+
+xwkuang_mean_and_std
+----------------------
+without making changes in transform [x] :
+tensor([-0.0021,  0.0889, -0.0518])
+tensor([0.9991, 1.0544, 0.9192])
+
+with resize [300x300]
+mean = tensor([0.4898, 0.4867, 0.4050])
+std  = tensor([0.2774, 0.2832, 0.2501])
+
+with-out resize [300x300]
+mean = tensor([0.4898, 0.4867, 0.4049])
+std  = tensor([0.2813, 0.2871, 0.2538])

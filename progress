@@ -12,21 +12,33 @@ Then, run on custom dataset [x]
      07:54 pm : understood convolutions, normalisation thing, ran inference on custom input
 
 May 13 :
-Run on custom dataset
+Run on custom dataset [True]
     09:57 am : started with Rafeeq dataset, for detection on SSD
     12:12 pm : created initial json files, starting with initial training
     12:30 pm : completed initial training, with no-pt weights
         - issue with label file, re-training initial model [15:06]
-        - add multi gpu support
-        - evaluate on pre-trained weights [classes are different issue]
-        - play with normalisation [rafeeq dataset specific]
-
-
-Convert it into TensorRT
+        - add multi gpu support [x]
+        - evaluate on pre-trained weights [classes are different issue] [x]
+        - play with normalisation [rafeeq dataset specific] [x]
 
 May 14 :
-Quantize model (which will require re-training)
+        - add multi gpu support [x]
+        - evaluate on pre-trained weights [classes are different issue]
+        - play with normalisation [rafeeq dataset specific]
+            - problem with pytorch way calculation bcz data already norm [10:40 am]
+            - since there are two ways to calculate mean/std, calculate with both and compare [came out same]
+            - training started with re-size rafeeq weights [11:19 am]
+            - there are always more experiments, you should know when to stop
+            - rafeeq values gave better resutls
+        - Start with model pruning [15:47 pm]
+
 
 May 15 :
+
+Quantize/model pruning model (which will require re-training)
+Convert it into TensorRT
 Try it on Raspberry-Pi
 
+
+May 17 :
+      - experimented with mean/std of test_hard (not possible in real time), didn't imrpvoe much

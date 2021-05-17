@@ -8,13 +8,13 @@ import torchvision.transforms.functional as FT
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # # Label map
-voc_labels = ('aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable',
-              'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor')
+# voc_labels = ('aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable',
+#               'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor')
 # label_map = {k: v + 1 for v, k in enumerate(voc_labels)}
 # label_map['background'] = 0
 # rev_label_map = {v: k for k, v in label_map.items()}  # Inverse mapping
 #
-# # Color map for bounding boxes of detected objects from https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
+# # Color map for bounding boxes of deseqtected objects from https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
 # distinct_colors = ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231', '#911eb4', '#46f0f0', '#f032e6',
 #                    '#d2f53c', '#fabebe', '#008080', '#000080', '#aa6e28', '#fffac8', '#800000', '#aaffc3', '#808000',
 #                    '#ffd8b1', '#e6beff', '#808080', '#FFFFFF']
@@ -173,7 +173,7 @@ def create_data_lists_rafeeq(rafeeq_path, output_folder):
     for path in [rafeeq_path]:
 
         # Find IDs of images in training data
-        with open(os.path.join(path, 'train.list')) as f:
+        with open(os.path.join(path, 'train_small.list')) as f:
             ids = f.read().splitlines()
 
         for id in ids:
@@ -698,12 +698,25 @@ def transform(image, boxes, labels, difficulties, split):
     :param split: one of 'TRAIN' or 'TEST', since different sets of transformations are applied
     :return: transformed image, transformed bounding box coordinates, transformed labels, transformed difficulties
     """
-    assert split in {'TRAIN', 'TEST'}
+    assert split in {'TRAIN', 'TEST','TEST_HARD'}
 
     # Mean and standard deviation of ImageNet data that our base VGG from torchvision was trained on
     # see: https://pytorch.org/docs/stable/torchvision/models.html
-    mean = [0.485, 0.456, 0.406]
-    std = [0.229, 0.224, 0.225]
+    # mean = [0.485, 0.456, 0.406]
+    # std = [0.229, 0.224, 0.225]
+
+    ##### xwkuang_mean_and_std | resized (300,300)
+    ## train
+    mean = [0.4898, 0.4867, 0.4050]
+    std = [0.2774, 0.2832, 0.2501]
+
+    ## test
+    # mean = [0.4732, 0.4713, 0.3964]
+    # std  = [0.2734, 0.2787, 0.2423]
+
+    ## test_hard
+    # mean = [0.5881, 0.5617, 0.4820]
+    # std  = [0.2968, 0.3004, 0.2938]
 
     new_image = image
     new_boxes = boxes

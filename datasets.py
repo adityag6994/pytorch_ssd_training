@@ -19,7 +19,7 @@ class PascalVOCDataset(Dataset):
         """
         self.split = split.upper()
 
-        assert self.split in {'TRAIN', 'TEST'}
+        assert self.split in {'TRAIN', 'TEST', 'TEST_HARD' }
 
         self.data_folder = data_folder
         self.keep_difficult = keep_difficult
@@ -87,3 +87,99 @@ class PascalVOCDataset(Dataset):
         images = torch.stack(images, dim=0)
 
         return images, boxes, labels, difficulties  # tensor (N, 3, 300, 300), 3 lists of N tensors each
+
+def online_mean_and_sd(loader):
+    """Compute the mean and sd in an online fashion
+
+        Var[x] = E[X^2] - E^2[X]
+    """
+    cnt = 0
+    fst_moment = torch.empty(3)
+    snd_moment = torch.empty(3)
+
+    for data in loader:
+
+        b, c, h, w = data.shape
+        nb_pixels = b * h * w
+        sum_ = torch.sum(data, dim=[0, 2, 3])
+        sum_of_square = torch.sum(data ** 2, dim=[0, 2, 3])
+        fst_moment = (cnt * fst_moment + sum_) / (cnt + nb_pixels)
+        snd_moment = (cnt * snd_moment + sum_of_square) / (cnt + nb_pixels)
+
+        cnt += nb_pixels
+
+    return fst_moment, torch.sqrt(snd_moment - fst_moment ** 2)
+
+def zzzf_mean_and_std(loader):
+    # https://discuss.pytorch.org/t/about-normalization-using-pre-trained-vgg16-networks/23560/39?u=aditya_gupta
+    mean = torch.zeros(3)
+    std = torch.zeros(3)
+
+    for i, data in enumerate(loader):
+        if (i % 100 == 0): print(i)
+        data = data[0].squeeze(0)
+        if (i == 0): size = data.size(1) * data.size(2)
+        mean += data.sum((1, 2)) / size
+
+    mean /= len(loader)
+    print(mean)
+    mean = mean.unsqueeze(1).unsqueeze(2)
+
+    for i, data in enumerate(loader):
+        if (i % 100 == 0): print(i)
+        data = data[0].squeeze(0)
+        std += ((data - mean) ** 2).sum((1, 2)) / size
+
+    std /= len(loader)
+    std = std.sqrt()
+    print(std)
+    return mean, std
+
+def huud_mean_and_std(loader):
+    # https: // discuss.pytorch.org / t / about - normalization - using - pre - trained - vgg16 - networks / 23560 / 19?u = aditya_gupta
+    mean = 0.
+    nb_samples = 0.
+    for data in loader:
+        batch_samples = data.size(0)
+        data = data.view(batch_samples, data.size(1), -1)
+        mean += data.mean(2).sum(0)
+        nb_samples += batch_samples
+
+    mean /= nb_samples
+
+    temp = 0.
+    nb_samples = 0.
+    for data in loader:
+        batch_samples = data.size(0)
+        elementNum = data.size(0) * data.size(2) * data.size(3)
+        data = data.permute(1,0,2,3).reshape(3, elementNum)
+        temp += ((data - mean.repeat(elementNum,1).permute(1,0))**2).sum(1)/(elementNum*batch_samples)
+        nb_samples += batch_samples
+
+    std = torch.sqrt(temp/nb_samples)
+    print(mean)
+    print(std)
+    return mean, std
+
+def xwkuang_mean_and_std(loader):
+    """Compute the mean and sd in an online fashion
+
+        Var[x] = E[X^2] - E^2[X]
+    """
+    cnt = 0
+    fst_moment = torch.empty(3)
+    snd_moment = torch.empty(3)
+
+    for data, boxes, labels, diff in loader:
+        # if(cnt%100 == 0):
+        #     print(cnt)
+        b, c, h, w = data.shape
+        nb_pixels = b * h * w
+        sum_ = torch.sum(data, dim=[0, 2, 3])
+        sum_of_square = torch.sum(data ** 2, dim=[0, 2, 3])
+        fst_moment = (cnt * fst_moment + sum_) / (cnt + nb_pixels)
+        snd_moment = (cnt * snd_moment + sum_of_square) / (cnt + nb_pixels)
+        # print(fst_moment, torch.sqrt(snd_moment - fst_moment ** 2), snd_moment)
+        cnt += nb_pixels
+
+    return fst_moment, torch.sqrt(snd_moment - fst_moment ** 2)

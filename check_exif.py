@@ -1,23 +1,26 @@
+import os
+
 import PIL.Image
 import PIL.ImageOps
 import numpy as np
 
-
-def exif_transpose(img):
+count = 0
+def exif_transpose(img, file):
+    global count
     if not img:
         return img
-
+    count += 1
     exif_orientation_tag = 274
 
     # Check for EXIF data (only present on some files)
     if hasattr(img, "_getexif") and isinstance(img._getexif(), dict) and exif_orientation_tag in img._getexif():
         exif_data = img._getexif()
         orientation = exif_data[exif_orientation_tag]
-        print('hasattr')
+        # print('hasattr')
         # Handle EXIF Orientation
         if orientation == 1:
             # Normal image - nothing to do!
-            print('1')
+            print(file, '1', count, img.size)
             pass
         elif orientation == 2:
             # Mirrored left to right
@@ -36,7 +39,7 @@ def exif_transpose(img):
             # Mirrored along top-left diagonal
             img = img.rotate(-90, expand=True).transpose(PIL.Image.FLIP_LEFT_RIGHT)
         elif orientation == 6:
-            print('6')
+            print(file,'6', count, img.size)
             # Rotated 90 degrees
             img = img.rotate(-90, expand=True)
         elif orientation == 7:
@@ -61,11 +64,13 @@ def load_image_file(file, mode='RGB'):
         # img = PIL.ImageOps.exif_transpose(img)
     # else:
         # Otherwise, do the exif transpose ourselves
-    print('else') 
-    img = exif_transpose(img)
+    # print('else')
+    img = exif_transpose(img, file=file)
 
     img = img.convert(mode)
 
     return np.array(img)
 
-load_image_file('b.jpg')
+folder = 'data/rafeeq/test1/images/'
+for i in os.listdir(folder):
+    load_image_file(folder+i)
