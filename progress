@@ -42,3 +42,20 @@ Try it on Raspberry-Pi
 
 May 17 :
       - experimented with mean/std of test_hard (not possible in real time), didn't imrpvoe much
+
+May 18 - 24 :
+      - tried adding jit support for ssd
+      - re-trained model by putting ReLU in model deination in __init__, instead of __forward__
+      - since, last layer is giving output in tuple(tensor of bbox and classes), it's getting stuck in jit.save/jit. step
+
+May 24 :
+      - possible things to explore:
+        - complete scripting thing (on hold)
+        - compare with yolov3
+
+May 25 :
+    - complete detect.py (yolov3)
+    - nms difference (soft nms), verify if nms is same
+    - study what architectural changes are made in yolov3/yolov3-spp/yolov3-tiny
+    - add the visualisationt thing
+
